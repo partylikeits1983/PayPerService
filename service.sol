@@ -34,7 +34,7 @@ contract PayPerService {
 
     mapping(address => service) public services; 
 
-    mapping(address => message) private serviceMessage; 
+    mapping(address => message) private messages; 
 
     mapping(address => paidService) public paidServices;
 
@@ -53,11 +53,10 @@ contract PayPerService {
         services[msg.sender].timestamp = block.timestamp;
         services[msg.sender].expirationTime = expirationTime;
         services[msg.sender].interestAmount = interestAmount;
-
-        serviceMessage[msg.sender].message = message;
-        serviceMessage[msg.sender].code = code;
-
         services[msg.sender].viewers = viewers;
+
+        messages[msg.sender].message = message;
+        messages[msg.sender].code = code;
 
     }
 
@@ -75,25 +74,25 @@ contract PayPerService {
             paidServices[msg.sender].amount = msg.value;
             paidServices[msg.sender].paid = true;
 
+            // write owner message to user address
 
+            string memory _message;
+            uint _code;
 
-            
+            _message = messages[owner].message;
+            _code = messages[owner].code;
+
+            messages[msg.sender].message = _message;
+            messages[msg.sender].code = _code;
 
         }
 
 
-    function viewMessage() public returns (string memory) {
+    function viewMessage() public view virtual returns (string memory) {
 
-        address owner;
-        string memory _message;
-        //uint code;
-        
         require(paidServices[msg.sender].paid == true);
 
-        owner = paidServices[msg.sender].owner;
-        _message = serviceMessage[owner].message;
-
-        return _message;
+        return messages[msg.sender].message;
 
     }
 
