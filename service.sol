@@ -25,12 +25,21 @@ contract PayPerService {
         bool paid;
     }
 
+
+
+
     // @dev owner address can list multiple services
     mapping(address => mapping (uint => service)) public services;
     
     // @dev user address can purchase multiple services from multiple addresses
     mapping(address => mapping (address => mapping (uint => paidService))) public paidServices;
     mapping(address => mapping (address => mapping (uint => message))) private messages;
+
+    // @dev keeps track of number of viewers of service
+    mapping(address => mapping (uint => uint[])) private numberOfViewers;
+
+
+
 
     // @dev get number of listed services owner address
     mapping(address => uint[]) private listmappingOwner;
@@ -49,6 +58,9 @@ contract PayPerService {
         uint _code
 
     ) public {
+
+        //require(expirationTime > block.timestamp);
+
 
         ID = listmappingOwner[msg.sender].length;
 
@@ -69,10 +81,14 @@ contract PayPerService {
     function payService(address owner, uint ID) public payable {
 
             uint payment;
+            uint viewers;
 
             payment = services[owner][ID].amount;
+            viewers = numberOfViewers[owner][ID].length;
 
             require(msg.value >= payment);
+            require(viewers <= services[owner][ID].viewers);
+
 
             paidServices[msg.sender][owner][ID].payee = msg.sender;
             paidServices[msg.sender][owner][ID].owner = owner;
@@ -81,8 +97,12 @@ contract PayPerService {
 
             paidServices[msg.sender][owner][ID].paid = true;
 
-            // write owner message to user address
+            // @dev push viewer to numberOfViewers map
+            numberOfViewers[owner][ID].push(viewers+1);
 
+
+
+            // @dev write owner message to user address
             string memory _message;
             uint _code;
 
