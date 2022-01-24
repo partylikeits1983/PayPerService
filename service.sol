@@ -38,7 +38,7 @@ contract PayPerService {
 
 
     // @dev keeps track of number of viewers of service
-    mapping(address => mapping (uint => uint[])) private numberOfViewers;
+    mapping(address => mapping (uint => uint[])) public numberOfViewers;
 
 
 
