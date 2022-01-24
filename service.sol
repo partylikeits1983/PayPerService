@@ -10,6 +10,8 @@ contract PayPerService {
         uint expirationTime;
         uint interestAmount;
         uint viewers;
+
+        bool available;
    }
 
     struct message {
@@ -26,18 +28,17 @@ contract PayPerService {
     }
 
 
-
-
     // @dev owner address can list multiple services
     mapping(address => mapping (uint => service)) public services;
     
+
     // @dev user address can purchase multiple services from multiple addresses
     mapping(address => mapping (address => mapping (uint => paidService))) public paidServices;
     mapping(address => mapping (address => mapping (uint => message))) private messages;
 
+
     // @dev keeps track of number of viewers of service
     mapping(address => mapping (uint => uint[])) private numberOfViewers;
-
 
 
 
@@ -70,6 +71,7 @@ contract PayPerService {
         services[msg.sender][ID].expirationTime = expirationTime;
         services[msg.sender][ID].interestAmount = interestAmount;
         services[msg.sender][ID].viewers = viewers;
+        services[msg.sender][ID].available = true;
 
         messages[msg.sender][msg.sender][ID].message = _message;
         messages[msg.sender][msg.sender][ID].code = _code;
@@ -86,6 +88,7 @@ contract PayPerService {
             payment = services[owner][ID].amount;
             viewers = numberOfViewers[owner][ID].length;
 
+            require(services[owner][ID].available == true);
             require(msg.value >= payment);
             require(viewers <= services[owner][ID].viewers);
 
@@ -99,7 +102,6 @@ contract PayPerService {
 
             // @dev push viewer to numberOfViewers map
             numberOfViewers[owner][ID].push(viewers+1);
-
 
 
             // @dev write owner message to user address
