@@ -4,7 +4,6 @@ pragma solidity >=0.7.0 <0.9.0;
 contract PayPerService {
 
     struct service {
-       
         address owner;
         uint amount;
         uint timestamp;
@@ -14,13 +13,11 @@ contract PayPerService {
    }
 
     struct message {
-
         string message;
         uint code;
     }
 
     struct paidService {
-
         address owner;
         address payee;
         uint amount;
@@ -39,6 +36,7 @@ contract PayPerService {
     mapping(address => uint[]) private listmappingOwner;
     //mapping(address => uint[]) private listmappingBuyer;
 
+    // @dev allows for multiple services to be listed by owner address
     uint private ID;
 
 
