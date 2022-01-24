@@ -1,5 +1,6 @@
+// SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
-
+/// @title Pay for Service Contract
 contract PayPerService {
 
     struct service {
@@ -27,21 +28,18 @@ contract PayPerService {
         bool paid;
     }
 
-
+    // @dev owner address can list multiple services
     mapping(address => mapping (uint => service)) public services;
-    //mapping(address => mapping (uint => message)) private messages;
-
+    
+    // @dev user address can purchase multiple services from multiple addresses
     mapping(address => mapping (address => mapping (uint => paidService))) public paidServices;
-
     mapping(address => mapping (address => mapping (uint => message))) private messages;
 
-
-
+    // @dev get number of listed services owner address
     mapping(address => uint[]) private listmappingOwner;
-    mapping(address => uint[]) private listmappingBuyer;
+    //mapping(address => uint[]) private listmappingBuyer;
 
     uint private ID;
-
 
 
     function newService(
