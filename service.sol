@@ -6,20 +6,16 @@ contract PayPerService {
        
         address owner;
         uint amount;
-
         uint timestamp;
         uint expirationTime;
-
         uint interestAmount;
         uint viewers;
-
    }
 
     struct message {
 
         string message;
         uint code;
-
     }
 
     struct paidService {
@@ -27,72 +23,87 @@ contract PayPerService {
         address owner;
         address payee;
         uint amount;
-
+        uint timestamp;
         bool paid;
-
     }
 
-    mapping(address => service) public services; 
 
-    mapping(address => message) private messages; 
+    mapping(address => mapping (uint => service)) public services;
+    //mapping(address => mapping (uint => message)) private messages;
 
-    mapping(address => paidService) public paidServices;
+    mapping(address => mapping (address => mapping (uint => paidService))) public paidServices;
+
+    mapping(address => mapping (address => mapping (uint => message))) private messages;
+
+
+
+    mapping(address => uint[]) private listmappingOwner;
+    mapping(address => uint[]) private listmappingBuyer;
+
+    uint private ID;
+
 
 
     function newService(
         uint amount,
         uint expirationTime,
         uint interestAmount,
-        string memory message,
-        uint code,
-        uint viewers
+        uint viewers,
+        string memory _message,
+        uint _code
 
     ) public {
-        services[msg.sender].owner = msg.sender;
-        services[msg.sender].amount = amount;
-        services[msg.sender].timestamp = block.timestamp;
-        services[msg.sender].expirationTime = expirationTime;
-        services[msg.sender].interestAmount = interestAmount;
-        services[msg.sender].viewers = viewers;
 
-        messages[msg.sender].message = message;
-        messages[msg.sender].code = code;
+        ID = listmappingOwner[msg.sender].length;
 
+        services[msg.sender][ID].owner = msg.sender;
+        services[msg.sender][ID].amount = amount;
+        services[msg.sender][ID].timestamp = block.timestamp;
+        services[msg.sender][ID].expirationTime = expirationTime;
+        services[msg.sender][ID].interestAmount = interestAmount;
+        services[msg.sender][ID].viewers = viewers;
+
+        messages[msg.sender][msg.sender][ID].message = _message;
+        messages[msg.sender][msg.sender][ID].code = _code;
+
+        listmappingOwner[msg.sender].push(ID);
     }
 
 
-    function payService(address owner) public payable {
+    function payService(address owner, uint ID) public payable {
 
             uint payment;
 
-            payment = services[owner].amount;
+            payment = services[owner][ID].amount;
 
             require(msg.value >= payment);
 
-            paidServices[msg.sender].payee = msg.sender;
-            paidServices[msg.sender].owner = owner;
-            paidServices[msg.sender].amount = msg.value;
-            paidServices[msg.sender].paid = true;
+            paidServices[msg.sender][owner][ID].payee = msg.sender;
+            paidServices[msg.sender][owner][ID].owner = owner;
+            paidServices[msg.sender][owner][ID].amount = msg.value;
+            paidServices[msg.sender][owner][ID].timestamp = block.timestamp;
+
+            paidServices[msg.sender][owner][ID].paid = true;
 
             // write owner message to user address
 
             string memory _message;
             uint _code;
 
-            _message = messages[owner].message;
-            _code = messages[owner].code;
+            _message = messages[owner][owner][ID].message;
+            _code = messages[owner][owner][ID].code;
 
-            messages[msg.sender].message = _message;
-            messages[msg.sender].code = _code;
+            messages[msg.sender][owner][ID].message = _message;
+            messages[msg.sender][owner][ID].code = _code;
 
         }
 
 
-    function viewMessage() public view virtual returns (string memory) {
+    function viewMessage(address owner, uint ID) public view virtual returns (string memory) {
 
-        require(paidServices[msg.sender].paid == true);
+        require(paidServices[msg.sender][owner][ID].paid == true);
 
-        return messages[msg.sender].message;
+        return messages[msg.sender][owner][ID].message;
 
     }
 
