@@ -106,4 +106,12 @@ contract PayPerService {
     }
 
 
+    function viewCode(address owner, uint ID) public view virtual returns (uint) {
+
+        require(paidServices[msg.sender][owner][ID].paid == true);
+
+        return messages[msg.sender][owner][ID].code;
+
+    }
+
 }
